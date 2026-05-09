@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoRegisterAnnotation;
 
@@ -10,4 +11,10 @@ namespace AutoRegisterAnnotation;
     ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature,
     ImplicitUseTargetFlags.Itself
 )]
-public sealed class AutoRegisterServiceAttribute : Attribute;
+public sealed class AutoRegisterServiceAttribute : Attribute
+{
+    /// <summary>
+    /// Lifetime of the registered service.
+    /// </summary>
+    public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Scoped;
+}

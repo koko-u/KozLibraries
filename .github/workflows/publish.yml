@@ -1,0 +1,30 @@
+name: Publish NuGet package
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Pack
+        run: dotnet pack -c Release -o ./packages /p:PackageVersion=${GITHUB_REF_NAME#v}
+
+      - name: Publish
+        run: dotnet nuget push "./packages/*.nupkg" --source "github" --api-key "${{ secrets.GITHUB_TOKEN }}" --skip-duplicate

@@ -1,7 +1,9 @@
 using System.Linq;
+using System.Text.Encodings.Web;
 using KozLibraries.TagHelpers.Extensions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
@@ -56,12 +58,12 @@ public sealed class BsValidationClassTagHelper(ILogger<BsValidationClassTagHelpe
             || modelStateEntry.Errors.Count > 0
         )
         {
-            output.AddCssClass("is-invalid", logger);
+            output.AddClass("is-invalid", HtmlEncoder.Default);
             output.Attributes.SetAttribute("aria-describedby", $"{fullName}_Feedback");
         }
         else
         {
-            output.AddCssClass("is-valid", logger);
+            output.AddClass("is-valid", HtmlEncoder.Default);
         }
 
         output.Attributes.RemoveAll("bs-valid");

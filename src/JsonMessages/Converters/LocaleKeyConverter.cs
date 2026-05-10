@@ -32,4 +32,25 @@ public sealed class LocaleKeyConverter : JsonConverter<LocaleKey>
     {
         writer.WriteStringValue(value.CultureName);
     }
+
+    public override LocaleKey ReadAsPropertyName(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        var cultureName =
+            reader.GetString() ?? throw new JsonException("null-value is not allowed.");
+
+        return new LocaleKey(cultureName);
+    }
+
+    public override void WriteAsPropertyName(
+        Utf8JsonWriter writer,
+        LocaleKey value,
+        JsonSerializerOptions options
+    )
+    {
+        writer.WriteStringValue(value.CultureName);
+    }
 }

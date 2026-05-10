@@ -1,7 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace KozLibraries.TagHelpers;
+namespace KozLibraries.TagHelpers.Extensions;
 
 internal static class TagHelperOutputExtension
 {
@@ -37,7 +37,7 @@ internal static class TagHelperOutputExtension
             return;
         }
 
-        if (classValues.Contains(cssClass))
+        if (!classValues.Contains(cssClass))
         {
             // classes not contains cssClass, then append cssClass
             output.Attributes.SetAttribute("class", $"{classValue} {cssClass}");

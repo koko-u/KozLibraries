@@ -11,7 +11,7 @@ public sealed class ActivePrefixPageTagHelper : TagHelper
     [ViewContext]
     [HtmlAttributeNotBound]
     public required ViewContext ViewContext { get; set; }
-    
+
     [HtmlAttributeName("active-when-prefix")]
     public string? Prefix { get; set; }
 
@@ -21,13 +21,13 @@ public sealed class ActivePrefixPageTagHelper : TagHelper
         {
             return;
         }
-        
+
         var currentPage = ViewContext.RouteData.Values["page"]?.ToString();
         if (string.IsNullOrWhiteSpace(currentPage))
         {
             return;
         }
-        
+
         if (currentPage.StartsWith(Prefix, StringComparison.OrdinalIgnoreCase))
         {
             if (output.Attributes.TryGetAttribute("class", out var classAttribute))

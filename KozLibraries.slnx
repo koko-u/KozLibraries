@@ -1,3 +1,7 @@
 <Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/TagHelpers/">
+    <Project Path="src/TagHelpers/KozLibraries.TagHelpers.csproj" />
+  </Folder>
   <Project Path="src/AutoRegisterAnnotation/AutoRegisterAnnotation.csproj" />
 </Solution>

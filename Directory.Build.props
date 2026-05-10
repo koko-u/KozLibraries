@@ -1,0 +1,7 @@
+<Project>
+    <PropertyGroup>
+        <Version>0.4.0</Version>
+        <Authors>KOZAKI Tsuneaki</Authors>
+        <RepositoryUrl>https://github.com/koko-u/KozLibraries</RepositoryUrl>
+    </PropertyGroup>
+</Project>

@@ -5,10 +5,7 @@
     <Nullable>enable</Nullable>
 
     <PackageId>kozLibraries.TagHelpers</PackageId>
-    <Version>0.1.0</Version>
-    <Authors>KOZAKI Tsuneaki</Authors>
     <Description>My Personal TagHelpers for Razor Pages</Description>
-    <RepositoryUrl>https://github.com/koko-u/KozLibraries</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -7,10 +7,7 @@
     <DefineConstants>$(DefineConstants);JETBRAINS_ANNOTATIONS</DefineConstants>
 
     <PackageId>kozLibraries.AutoRegisterAnnotation</PackageId>
-    <Version>0.2.0</Version>
-    <Authors>KOZAKI Tsuneaki</Authors>
     <Description>My Personal .NET Common Library for Services</Description>
-    <RepositoryUrl>https://github.com/koko-u/KozLibraries</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

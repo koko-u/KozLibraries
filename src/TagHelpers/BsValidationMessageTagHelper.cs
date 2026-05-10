@@ -31,6 +31,6 @@ public sealed class BsValidationMessageTagHelper(ILogger<BsValidationMessageTagH
         logger.LogDebug($"Processing bs-valid for field: {fullName}");
 
         output.Attributes.SetAttribute("id", $"{fullName}_Feedback");
-        output.AddCssClass("invalid-feedback");
+        output.AddCssClass("invalid-feedback", logger);
     }
 }

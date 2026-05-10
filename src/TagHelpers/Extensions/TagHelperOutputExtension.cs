@@ -1,5 +1,6 @@
 using System;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.Extensions.Logging;
 
 namespace KozLibraries.TagHelpers.Extensions;
 
@@ -20,7 +21,11 @@ internal static class TagHelperOutputExtension
         return string.Equals(attr.Value?.ToString(), "hidden", StringComparison.OrdinalIgnoreCase);
     }
 
-    public static void AddCssClass(this TagHelperOutput output, string cssClass)
+    public static void AddCssClass(
+        this TagHelperOutput output,
+        string cssClass,
+        ILogger? logger = null
+    )
     {
         if (!output.Attributes.TryGetAttribute("class", out var classAttr))
         {
@@ -28,7 +33,9 @@ internal static class TagHelperOutputExtension
             return;
         }
 
-        var classValue = classAttr.Value.ToString() ?? string.Empty;
+        var classValue = classAttr.Value?.ToString() ?? string.Empty;
+        logger?.LogDebug($"current class attributes: {classValue}");
+
         var classValues = classValue.Split(" ", StringSplitOptions.RemoveEmptyEntries);
         if (classValues.Length == 0)
         {

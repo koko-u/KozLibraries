@@ -56,12 +56,12 @@ public sealed class BsValidationClassTagHelper(ILogger<BsValidationClassTagHelpe
             || modelStateEntry.Errors.Count > 0
         )
         {
-            output.AddCssClass("is-invalid");
+            output.AddCssClass("is-invalid", logger);
             output.Attributes.SetAttribute("aria-describedby", $"{fullName}_Feedback");
         }
         else
         {
-            output.AddCssClass("is-valid");
+            output.AddCssClass("is-valid", logger);
         }
 
         output.Attributes.RemoveAll("bs-valid");

@@ -12,10 +12,14 @@ public static class AutoRegisterServiceExtensions
     /// Registers services based on the AutoRegisterServiceAttribute.
     /// </summary>
     /// <param name="services"></param>
+    /// <param name="onRegistered">registered action for each service registration</param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public static IServiceCollection AddAutoRegisterServices<T>(this IServiceCollection services)
+    public static IServiceCollection AddAutoRegisterServices<T>(
+        this IServiceCollection services,
+        Action<Type, ServiceLifetime>? onRegistered = null
+    )
         where T : class
     {
         var srvTypes = typeof(T)
@@ -32,13 +36,22 @@ public static class AutoRegisterServiceExtensions
 
         foreach (var (service, lifetime) in srvTypes)
         {
-            return lifetime switch
+            switch (lifetime)
             {
-                ServiceLifetime.Scoped => services.AddScoped(service),
-                ServiceLifetime.Singleton => services.AddSingleton(service),
-                ServiceLifetime.Transient => services.AddTransient(service),
-                _ => throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null),
-            };
+                case ServiceLifetime.Scoped:
+                    services.AddScoped(service);
+                    break;
+                case ServiceLifetime.Singleton:
+                    services.AddSingleton(service);
+                    break;
+                case ServiceLifetime.Transient:
+                    services.AddTransient(service);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
+
+            onRegistered?.Invoke(service, lifetime);
         }
         return services;
     }

@@ -2,6 +2,7 @@
   <PropertyGroup>
     <Authors>KOZAKI Tsuneaki</Authors>
     <RepositoryUrl>https://github.com/koko-u/KozLibraries</RepositoryUrl>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
   </PropertyGroup>
 
   <ItemGroup>

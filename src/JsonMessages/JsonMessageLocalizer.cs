@@ -14,7 +14,7 @@ public sealed class JsonMessageLocalizer(
     IConfiguration configuration
 )
 {
-    private LocaleKey DefaultCulture => new LocaleKey(configuration["DefaultCulture"] ?? "en");
+    private LocaleKey DefaultCulture => configuration["DefaultCulture"] ?? "en";
     private readonly ConcurrentDictionary<LocaleKey, Dictionary<MessageKey, string>> _messageCache =
         new();
 
@@ -27,12 +27,12 @@ public sealed class JsonMessageLocalizer(
     {
         var culture = CultureInfo.CurrentUICulture;
 
-        if (this.TryGet(new LocaleKey(culture.Name), key, out var message1))
+        if (this.TryGet(culture.Name, key, out var message1))
         {
             return message1;
         }
 
-        if (this.TryGet(new LocaleKey(culture.TwoLetterISOLanguageName), key, out var message2))
+        if (this.TryGet(culture.TwoLetterISOLanguageName, key, out var message2))
         {
             return message2;
         }

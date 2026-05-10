@@ -1,6 +1,10 @@
+using System.Text.Json.Serialization;
+using KozLibraries.JsonMessages.Converters;
+
 namespace KozLibraries.JsonMessages.Localizer;
 
-public record struct MessageKey(string Key)
+[JsonConverter(typeof(MessageKeyConverter))]
+public readonly record struct MessageKey(string Key)
 {
     public static implicit operator string(MessageKey key) => key.Key;
 

@@ -96,17 +96,13 @@ public sealed class JsonMessageLocalizer(
     /// <returns></returns>
     private Dictionary<MessageKey, string> ReadFromResourceFile(LocaleKey locale)
     {
-        var path = Path.Combine(
-            environment.ContentRootPath,
-            "Resources",
-            $"messages.{locale}.json"
-        );
-        if (!File.Exists(path))
+        var jsonPath = JsonPath(locale);
+        if (jsonPath is null)
         {
             return [];
         }
 
-        using var stream = File.OpenRead(path);
+        using var stream = File.OpenRead(jsonPath);
         var messages = JsonSerializer.Deserialize<Dictionary<MessageKey, string>>(
             stream,
             new JsonSerializerOptions
@@ -117,5 +113,40 @@ public sealed class JsonMessageLocalizer(
         );
 
         return messages ?? [];
+    }
+
+    /// <summary>
+    /// Get messages json path for locale
+    /// </summary>
+    /// <param name="locale"></param>
+    /// <returns>
+    /// Resources/messages.{locale}.json path or Resources/messages.{locale}.jsonc path
+    /// otherwise return null.
+    /// </returns>
+    private string? JsonPath(LocaleKey locale)
+    {
+        // json extension file
+        var path1 = Path.Combine(
+            environment.ContentRootPath,
+            "Resources",
+            $"messages.{locale}.json"
+        );
+        if (File.Exists(path1))
+        {
+            return path1;
+        }
+
+        // jsonc extension file
+        var path2 = Path.Combine(
+            environment.ContentRootPath,
+            "Resources",
+            $"messages.{locale}.jsonc"
+        );
+        if (File.Exists(path2))
+        {
+            return path2;
+        }
+
+        return null;
     }
 }

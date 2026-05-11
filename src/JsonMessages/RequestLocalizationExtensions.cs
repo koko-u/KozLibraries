@@ -2,14 +2,25 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KozLibraries.JsonMessages;
 
+/// <summary>
+/// Extensions for configuring request localization with JSON message support.
+/// </summary>
+[PublicAPI]
 public static class RequestLocalizationExtensions
 {
+    /// <summary>
+    /// add support for JSON message localization
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="supportedCultures"></param>
+    /// <returns></returns>
     public static IServiceCollection ConfigureRequestLocalization(
         this IServiceCollection services,
         Func<IEnumerable<CultureInfo>> supportedCultures

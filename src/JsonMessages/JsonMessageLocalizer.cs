@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.Json;
+using JetBrains.Annotations;
 using KozLibraries.JsonMessages.Localizer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +24,7 @@ public sealed class JsonMessageLocalizer(
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
+    [PublicAPI]
     public string Get(MessageKey key)
     {
         var culture = CultureInfo.CurrentUICulture;
@@ -46,11 +48,12 @@ public sealed class JsonMessageLocalizer(
     }
 
     /// <summary>
-    /// Format localized messsage by key with params
+    /// Format localized message by key with params
     /// </summary>
     /// <param name="key"></param>
     /// <param name="values"></param>
     /// <returns></returns>
+    [PublicAPI]
     public string Format(MessageKey key, object values)
     {
         var template = this.Get(key);
@@ -67,12 +70,13 @@ public sealed class JsonMessageLocalizer(
     }
 
     /// <summary>
-    /// Try get localized messsage by culture and key
+    /// Try get localized message by culture and key
     /// </summary>
     /// <param name="locale"></param>
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <returns></returns>
+    [PublicAPI]
     public bool TryGet(LocaleKey locale, MessageKey key, out string value)
     {
         var messages = _messageCache.GetOrAdd(locale, ReadFromResourceFile);
@@ -103,7 +107,14 @@ public sealed class JsonMessageLocalizer(
         }
 
         using var stream = File.OpenRead(path);
-        var messages = JsonSerializer.Deserialize<Dictionary<MessageKey, string>>(stream);
+        var messages = JsonSerializer.Deserialize<Dictionary<MessageKey, string>>(
+            stream,
+            new JsonSerializerOptions
+            {
+                ReadCommentHandling = JsonCommentHandling.Skip,
+                AllowTrailingCommas = true,
+            }
+        );
 
         return messages ?? [];
     }

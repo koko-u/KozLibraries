@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Data;
 using Dapper;
+using JetBrains.Annotations;
 
 namespace KozLibraries.DapperDateOnlySupport;
 
+/// <summary>
+/// DateOnly type handler for Dapper (PostgreSQL)
+/// </summary>
+[PublicAPI]
 public sealed class DateOnlyHandler : SqlMapper.TypeHandler<DateOnly>
 {
     /// <summary>
@@ -14,7 +19,8 @@ public sealed class DateOnlyHandler : SqlMapper.TypeHandler<DateOnly>
     /// <exception cref="NotImplementedException"></exception>
     public override void SetValue(IDbDataParameter parameter, DateOnly value)
     {
-        parameter.Value = value.ToDateTime(TimeOnly.MinValue);
+        parameter.DbType = DbType.Date;
+        parameter.Value = value;
     }
 
     /// <summary>
@@ -25,7 +31,14 @@ public sealed class DateOnlyHandler : SqlMapper.TypeHandler<DateOnly>
     /// <exception cref="NotImplementedException"></exception>
     public override DateOnly Parse(object value)
     {
-        var datetime = (DateTime)value;
-        return DateOnly.FromDateTime(datetime);
+        return value switch
+        {
+            DateOnly dateOnly => dateOnly,
+            DateTime date => DateOnly.FromDateTime(date),
+            string s => DateOnly.Parse(s),
+            _ => throw new DataException(
+                $"Cannot parse {value}({value.GetType().FullName}) to DateOnly"
+            ),
+        };
     }
 }

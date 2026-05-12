@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <KozLibrariesVersion>0.18.0</KozLibrariesVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="JetBrains.Annotations" Version="2025.2.4" />
+    <PackageVersion
+      Include="Microsoft.Extensions.DependencyInjection.Abstractions"
+      Version="10.0.7"
+    />
+    <PackageVersion Include="Dapper" Version="2.1.72" />
+    <PackageVersion Include="MinVer" Version="7.0.0" />
+  </ItemGroup>
+</Project>

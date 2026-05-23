@@ -3,6 +3,9 @@
   <Folder Name="/src/DapperDateOnlySupport/">
     <Project Path="src/DapperDateOnlySupport/KozLibraries.DapperDateOnlySupport.csproj" />
   </Folder>
+  <Folder Name="/src/DapperSqlHelper/">
+    <Project Path="src/DapperSqlHelper/KozLibraries.DapperSqlHelper.csproj" />
+  </Folder>
   <Folder Name="/src/JsonMessages/">
     <Project Path="src/JsonMessages/KozLibraries.JsonMessages.csproj" />
   </Folder>

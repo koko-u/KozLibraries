@@ -12,17 +12,16 @@ public static class AutoRegisterServiceExtensions
     /// Registers services based on the AutoRegisterServiceAttribute.
     /// </summary>
     /// <param name="services"></param>
+    /// <param name="type">type in the assembly</param>
     /// <param name="onRegistered">registered action for each service registration</param>
-    /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public static IServiceCollection AddAutoRegisterServices<T>(
+    public static IServiceCollection AddAutoRegisterServices(
         this IServiceCollection services,
+        Type type,
         Action<Type, ServiceLifetime>? onRegistered = null
     )
-        where T : class
     {
-        var srvTypes = typeof(T)
+        var srvTypes = type
             .Assembly.GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false })
             .Where(t =>
@@ -54,5 +53,22 @@ public static class AutoRegisterServiceExtensions
             onRegistered?.Invoke(service, lifetime);
         }
         return services;
+    }
+
+    /// <summary>
+    /// Registers services based on the AutoRegisterServiceAttribute.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="onRegistered">registered action for each service registration</param>
+    /// <typeparam name="T">Some class in the assembly</typeparam>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public static IServiceCollection AddAutoRegisterServices<T>(
+        this IServiceCollection services,
+        Action<Type, ServiceLifetime>? onRegistered = null
+    )
+        where T : class
+    {
+        return services.AddAutoRegisterServices(typeof(T), onRegistered);
     }
 }

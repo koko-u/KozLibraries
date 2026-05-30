@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace KozLibraries.DapperSqlHelper;
 
 /// <summary>
@@ -9,4 +11,9 @@ public sealed class SqlResourceOption
     /// base path for sql resource files
     /// </summary>
     public string SqlBasePath { get; set; } = "Sql";
+
+    /// <summary>
+    /// Assembly to load sql resource files from
+    /// </summary>
+    public Assembly? Assembly { get; set; }
 }

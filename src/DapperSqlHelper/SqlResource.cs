@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -12,12 +14,42 @@ namespace KozLibraries.DapperSqlHelper;
 /// プロジェクトルートの所定のフォルダ配下の SQL リソースファイルを管理するクラスです
 /// </summary>
 [PublicAPI]
-public sealed class SqlResource(IHostEnvironment env, IOptions<SqlResourceOption> options)
+public sealed class SqlResource
 {
-    private readonly IFileProvider _fileProvider = options.Value.Assembly is null
-        ? env.ContentRootFileProvider
-        : new ManifestEmbeddedFileProvider(options.Value.Assembly);
-    private readonly SqlResourceOption _option = options.Value;
+    private readonly IFileProvider _fileProvider;
+    private readonly SqlResourceOption _option;
+
+    /// <summary>
+    /// プロジェクトルートの所定のフォルダ配下の SQL リソースファイルを管理するクラスです
+    /// </summary>
+    public SqlResource(IHostEnvironment env, IOptions<SqlResourceOption> options)
+    {
+        _fileProvider = options.Value.Assembly is null
+            ? env.ContentRootFileProvider
+            : new ManifestEmbeddedFileProvider(options.Value.Assembly);
+        _option = options.Value;
+
+        if (options.Value.Assembly is not null)
+        {
+            var hasManifest = options
+                .Value.Assembly.GetManifestResourceNames()
+                .Any(x =>
+                    x.EndsWith(
+                        "Microsoft.Extensions.FileProviders.Embedded.Manifest.xml",
+                        StringComparison.Ordinal
+                    )
+                );
+            if (!hasManifest)
+            {
+                throw new InvalidOperationException(
+                    """
+                    Embedded manifest file not found in the assembly.
+                    Your project should contain 'GenerateEmbeddedFilesManifest' property set to true.
+                    """
+                );
+            }
+        }
+    }
 
     /// <summary>
     /// Get Sql query from file

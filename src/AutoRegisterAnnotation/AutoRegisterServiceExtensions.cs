@@ -18,7 +18,7 @@ public static class AutoRegisterServiceExtensions
     public static IServiceCollection AddAutoRegisterServices(
         this IServiceCollection services,
         Type type,
-        Action<Type, ServiceLifetime>? onRegistered = null
+        Action<ServiceTypePair>? onRegistered = null
     )
     {
         var srvTypes = type
@@ -36,16 +36,13 @@ public static class AutoRegisterServiceExtensions
                     .Select(serviceType =>
                     {
                         var lifetime = attr?.Lifetime ?? ServiceLifetime.Scoped;
-                        return (
-                            serviceType: serviceType,
-                            implementationType: t,
-                            lifetime: lifetime
-                        );
+                        return new ServiceTypePair(serviceType, t, lifetime);
                     });
             });
 
-        foreach (var (serviceType, implementationType, lifetime) in srvTypes)
+        foreach (var srvType in srvTypes)
         {
+            var (serviceType, implementationType, lifetime) = srvType;
             switch (lifetime)
             {
                 case ServiceLifetime.Scoped:
@@ -61,7 +58,7 @@ public static class AutoRegisterServiceExtensions
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
 
-            onRegistered?.Invoke(serviceType, lifetime);
+            onRegistered?.Invoke(srvType);
         }
         return services;
     }
@@ -76,7 +73,7 @@ public static class AutoRegisterServiceExtensions
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     public static IServiceCollection AddAutoRegisterServices<T>(
         this IServiceCollection services,
-        Action<Type, ServiceLifetime>? onRegistered = null
+        Action<ServiceTypePair>? onRegistered = null
     )
         where T : class
     {

@@ -27,30 +27,41 @@ public static class AutoRegisterServiceExtensions
             .Where(t =>
                 t.GetCustomAttribute<AutoRegisterServiceAttribute>(inherit: true) is not null
             )
-            .Select(t =>
+            .SelectMany(t =>
             {
                 var attr = t.GetCustomAttribute<AutoRegisterServiceAttribute>(inherit: true);
-                return (service: t, lifetime: attr?.Lifetime ?? ServiceLifetime.Scoped);
+                var serviceTypes = ResolveServiceTypes(t, attr);
+                return serviceTypes
+                    .Distinct()
+                    .Select(serviceType =>
+                    {
+                        var lifetime = attr?.Lifetime ?? ServiceLifetime.Scoped;
+                        return (
+                            serviceType: serviceType,
+                            implementationType: t,
+                            lifetime: lifetime
+                        );
+                    });
             });
 
-        foreach (var (service, lifetime) in srvTypes)
+        foreach (var (serviceType, implementationType, lifetime) in srvTypes)
         {
             switch (lifetime)
             {
                 case ServiceLifetime.Scoped:
-                    services.AddScoped(service);
+                    services.AddScoped(serviceType, implementationType);
                     break;
                 case ServiceLifetime.Singleton:
-                    services.AddSingleton(service);
+                    services.AddSingleton(serviceType, implementationType);
                     break;
                 case ServiceLifetime.Transient:
-                    services.AddTransient(service);
+                    services.AddTransient(serviceType, implementationType);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
             }
 
-            onRegistered?.Invoke(service, lifetime);
+            onRegistered?.Invoke(serviceType, lifetime);
         }
         return services;
     }
@@ -70,5 +81,56 @@ public static class AutoRegisterServiceExtensions
         where T : class
     {
         return services.AddAutoRegisterServices(typeof(T), onRegistered);
+    }
+
+    private static IEnumerable<Type> ResolveServiceTypes(
+        Type implementationType,
+        AutoRegisterServiceAttribute? attr
+    )
+    {
+        if (attr is null)
+        {
+            yield break;
+        }
+
+        if (attr.ServiceTypes.Count > 0)
+        {
+            // AutoRegisterService にサービスタイプが指定されている
+            foreach (var serviceType in attr.ServiceTypes)
+            {
+                if (!serviceType.IsAssignableTo(implementationType))
+                {
+                    throw new InvalidOperationException(
+                        $"Service type {serviceType.Name} is not assignable to implementation type {implementationType.Name}"
+                    );
+                }
+
+                yield return serviceType;
+            }
+        }
+        else
+        {
+            // 指定がない場合はインターフェースを探す
+            var interfaceName = $"I{implementationType.Name}";
+            var interfaceType = implementationType
+                .GetInterfaces()
+                .FirstOrDefault(i => i.Name == interfaceName);
+            if (interfaceType != null)
+            {
+                // インターフェイスがあればそれが serviceType
+                yield return interfaceType;
+            }
+            else
+            {
+                // なければ実装クラスが serviceType
+                yield return implementationType;
+            }
+        }
+
+        if (attr.RegisterSelf)
+        {
+            // 自分自身も登録する
+            yield return implementationType;
+        }
     }
 }

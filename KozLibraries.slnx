@@ -12,5 +12,8 @@
   <Folder Name="/src/TagHelpers/">
     <Project Path="src/TagHelpers/KozLibraries.TagHelpers.csproj" />
   </Folder>
+  <Folder Name="/src/TransactionRunner/">
+    <Project Path="src/TransactionRunner/KozLibraries.TransactionRunner.csproj" />
+  </Folder>
   <Project Path="src/AutoRegisterAnnotation/AutoRegisterAnnotation.csproj" />
 </Solution>

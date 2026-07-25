@@ -6,7 +6,7 @@
 
     <DefineConstants>$(DefineConstants);JETBRAINS_ANNOTATIONS</DefineConstants>
 
-    <PackageId>kozLibraries.AutoRegisterAnnotation</PackageId>
+    <PackageId>KozLibraries.AutoRegisterAnnotation</PackageId>
     <Description>My Personal .NET Common Library for Services</Description>
   </PropertyGroup>
 

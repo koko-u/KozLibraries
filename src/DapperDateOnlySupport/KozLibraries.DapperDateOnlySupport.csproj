@@ -4,7 +4,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <PackageId>kozLibraries.DapperDateOnlySupport</PackageId>
+    <PackageId>KozLibraries.DapperDateOnlySupport</PackageId>
     <Description>My Personal .NET Common Library for DateOnly Handler in Dapper</Description>
   </PropertyGroup>
 

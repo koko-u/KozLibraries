@@ -9,7 +9,9 @@ namespace AutoRegisterAnnotation;
 public static class AutoRegisterServiceExtensions
 {
     /// <summary>
-    /// Registers services based on the AutoRegisterServiceAttribute.
+    /// Scans the assembly containing <paramref name="type"/> and registers concrete classes
+    /// directly annotated with <see cref="AutoRegisterServiceAttribute"/>.
+    /// Inherited attributes are not considered.
     /// </summary>
     /// <param name="services"></param>
     /// <param name="type">type in the assembly</param>
@@ -27,10 +29,10 @@ public static class AutoRegisterServiceExtensions
         var srvTypes = type
             .Assembly.GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false })
-            .Where(t => t.GetCustomAttribute<AutoRegisterServiceAttribute>(inherit: true) is not null)
+            .Where(t => t.GetCustomAttribute<AutoRegisterServiceAttribute>(inherit: false) is not null)
             .SelectMany(t =>
             {
-                var attr = t.GetCustomAttribute<AutoRegisterServiceAttribute>(inherit: true);
+                var attr = t.GetCustomAttribute<AutoRegisterServiceAttribute>(inherit: false);
                 var serviceTypes = ResolveServiceTypes(t, attr);
                 return serviceTypes
                     .Distinct()
@@ -71,7 +73,9 @@ public static class AutoRegisterServiceExtensions
     }
 
     /// <summary>
-    /// Registers services based on the AutoRegisterServiceAttribute.
+    /// Scans the assembly containing <typeparamref name="T"/> and registers concrete classes
+    /// directly annotated with <see cref="AutoRegisterServiceAttribute"/>.
+    /// Inherited attributes are not considered.
     /// </summary>
     /// <param name="services"></param>
     /// <param name="onRegistered">

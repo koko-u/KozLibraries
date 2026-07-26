@@ -126,5 +126,6 @@ builder.Services.AddAutoRegisterServices<UserService>(registered =>
 - 抽象クラスは登録されません。
 - 同じサービス型が既に登録されていても置き換えは行わず、通常の
   `AddScoped` などと同様に登録を追加します。
-- 属性の `Inherited` は有効です。基底クラスの属性を継承した具象クラスも走査対象に
-  なります。
+- `AutoRegisterServiceAttribute` は派生クラスへ継承されません。登録対象にする具象クラス
+  ごとに属性を直接付けてください。基底クラスにだけ属性が付いている場合、その派生クラス
+  は登録されません。

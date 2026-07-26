@@ -95,7 +95,7 @@ public static class AutoRegisterServiceExtensions
             // AutoRegisterService にサービスタイプが指定されている
             foreach (var serviceType in attr.ServiceTypes)
             {
-                if (!serviceType.IsAssignableTo(implementationType))
+                if (!serviceType.IsAssignableFrom(implementationType))
                 {
                     throw new InvalidOperationException(
                         $"Service type {serviceType.Name} is not assignable to implementation type {implementationType.Name}"

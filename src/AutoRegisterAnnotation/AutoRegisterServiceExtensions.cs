@@ -13,7 +13,10 @@ public static class AutoRegisterServiceExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <param name="type">type in the assembly</param>
-    /// <param name="onRegistered">registered action for each service registration</param>
+    /// <param name="onRegistered">
+    /// Action invoked after each service registration. The callback must not throw an exception;
+    /// otherwise, services registered before the exception will remain in the collection.
+    /// </param>
     /// <returns></returns>
     public static IServiceCollection AddAutoRegisterServices(
         this IServiceCollection services,
@@ -24,9 +27,7 @@ public static class AutoRegisterServiceExtensions
         var srvTypes = type
             .Assembly.GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false })
-            .Where(t =>
-                t.GetCustomAttribute<AutoRegisterServiceAttribute>(inherit: true) is not null
-            )
+            .Where(t => t.GetCustomAttribute<AutoRegisterServiceAttribute>(inherit: true) is not null)
             .SelectMany(t =>
             {
                 var attr = t.GetCustomAttribute<AutoRegisterServiceAttribute>(inherit: true);
@@ -38,25 +39,31 @@ public static class AutoRegisterServiceExtensions
                         var lifetime = attr?.Lifetime ?? ServiceLifetime.Scoped;
                         return new ServiceTypePair(serviceType, t, lifetime);
                     });
-            });
+            })
+            .ToList();
 
+        // check Lifetime
         foreach (var srvType in srvTypes)
         {
-            var (serviceType, implementationType, lifetime) = srvType;
-            switch (lifetime)
+            if (!Enum.IsDefined(typeof(ServiceLifetime), srvType.Lifetime))
             {
-                case ServiceLifetime.Scoped:
-                    services.AddScoped(serviceType, implementationType);
-                    break;
-                case ServiceLifetime.Singleton:
-                    services.AddSingleton(serviceType, implementationType);
-                    break;
-                case ServiceLifetime.Transient:
-                    services.AddTransient(serviceType, implementationType);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+                throw new ArgumentOutOfRangeException(
+                    nameof(srvType.Lifetime),
+                    srvType.Lifetime,
+                    "Service type lifetime is not defined"
+                );
             }
+        }
+
+        // register DI
+        foreach (var srvType in srvTypes)
+        {
+            var serviceDescriptor = new ServiceDescriptor(
+                srvType.ServiceType,
+                srvType.ImplementationType,
+                srvType.Lifetime
+            );
+            services.Add(serviceDescriptor);
 
             onRegistered?.Invoke(srvType);
         }
@@ -67,7 +74,10 @@ public static class AutoRegisterServiceExtensions
     /// Registers services based on the AutoRegisterServiceAttribute.
     /// </summary>
     /// <param name="services"></param>
-    /// <param name="onRegistered">registered action for each service registration</param>
+    /// <param name="onRegistered">
+    /// Action invoked after each service registration. The callback must not throw an exception;
+    /// otherwise, services registered before the exception will remain in the collection.
+    /// </param>
     /// <typeparam name="T">Some class in the assembly</typeparam>
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
@@ -80,10 +90,7 @@ public static class AutoRegisterServiceExtensions
         return services.AddAutoRegisterServices(typeof(T), onRegistered);
     }
 
-    private static IEnumerable<Type> ResolveServiceTypes(
-        Type implementationType,
-        AutoRegisterServiceAttribute? attr
-    )
+    private static IEnumerable<Type> ResolveServiceTypes(Type implementationType, AutoRegisterServiceAttribute? attr)
     {
         if (attr is null)
         {
@@ -109,13 +116,17 @@ public static class AutoRegisterServiceExtensions
         {
             // 指定がない場合はインターフェースを探す
             var interfaceName = $"I{implementationType.Name}";
-            var interfaceType = implementationType
-                .GetInterfaces()
-                .FirstOrDefault(i => i.Name == interfaceName);
-            if (interfaceType != null)
+            var interfaceTypes = implementationType.GetInterfaces().Where(i => i.Name == interfaceName).ToList();
+            if (interfaceTypes.Count > 1)
             {
-                // インターフェイスがあればそれが serviceType
-                yield return interfaceType;
+                // 規約に一致するインターフェイスが複数ある場合は、曖昧なので失敗させる
+                throw new InvalidOperationException("Ambiguous service type found");
+            }
+
+            if (interfaceTypes.Count == 1)
+            {
+                // 規約に一致するインターフェイスが一つに決まれば、それを serviceType とする
+                yield return interfaceTypes[0];
             }
             else
             {

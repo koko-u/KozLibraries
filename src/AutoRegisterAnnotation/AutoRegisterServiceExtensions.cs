@@ -19,17 +19,34 @@ public static class AutoRegisterServiceExtensions
     /// Action invoked after each service registration. The callback must not throw an exception;
     /// otherwise, services registered before the exception will remain in the collection.
     /// </param>
-    /// <returns></returns>
+    /// <exception cref="InvalidOperationException">
+    /// An annotated implementation type contains unbound generic parameters,
+    /// or a valid service type cannot be determined.
+    /// </exception>
     public static IServiceCollection AddAutoRegisterServices(
         this IServiceCollection services,
         Type type,
         Action<ServiceTypePair>? onRegistered = null
     )
     {
-        var srvTypes = type
+        var implTypes = type
             .Assembly.GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false })
             .Where(t => t.GetCustomAttribute<AutoRegisterServiceAttribute>(inherit: false) is not null)
+            .ToList();
+
+        // exclude generic type
+        foreach (var implType in implTypes)
+        {
+            if (implType.ContainsGenericParameters)
+            {
+                throw new InvalidOperationException(
+                    $"AutoRegisterService 属性はジェネリック型({implType.FullName})をサポートしていません。"
+                );
+            }
+        }
+
+        var srvTypes = implTypes
             .SelectMany(t =>
             {
                 var attr = t.GetCustomAttribute<AutoRegisterServiceAttribute>(inherit: false);

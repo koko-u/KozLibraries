@@ -72,11 +72,13 @@ public sealed class UserService : IUserService;
 public sealed class UserService : IUserService, IUserReader;
 ```
 
-コンストラクターでは複数のサービス型を指定できます。ただし、現行実装の型検証は
-`serviceType.IsAssignableTo(implementationType)` を使用しているため、上のように
-実装インターフェイスを明示すると登録時に `InvalidOperationException` が発生します。
-インターフェイスで登録する場合は、現時点では引数を省略して名前規約による登録を
-利用してください。
+コンストラクターでは複数のサービス型を指定できます。指定できるのは、実装クラスを
+代入できるサービス型だけです。実装していないインターフェイスや継承関係のないクラスを
+指定すると、登録時に `InvalidOperationException` が発生します。
+
+名前規約に一致する同名のインターフェイスが異なる名前空間に複数ある場合は、
+登録先を一意に決められないため `InvalidOperationException` が発生します。その場合は、
+上の例のようにサービス型を明示してください。
 
 ### 実装クラス自身も登録する
 
@@ -120,10 +122,19 @@ builder.Services.AddAutoRegisterServices<UserService>(registered =>
 コールバックには、サービス型、実装型、ライフタイムを持つ
 `ServiceTypePair` が渡されます。
 
+コールバックは各サービスを DI コンテナーへ追加した後に呼び出されます。コールバックから
+例外を送出しないでください。例外が送出された場合、それ以前に追加されたサービスは
+コレクションに残ります。
+
 ## 注意事項
 
 - 走査対象は、`AddAutoRegisterServices` に渡した型が属するアセンブリだけです。
 - 抽象クラスは登録されません。
+- 未確定の型パラメーターを含むオープンジェネリック実装型はサポートしていません。
+  そのような型へ `[AutoRegisterService]` を付けると、登録時に
+  `InvalidOperationException` が発生し、サービスは登録されません。
+- `IRepository<User>` のように型引数が確定したインターフェイスを実装する
+  非ジェネリック具象クラスは登録できます。
 - 同じサービス型が既に登録されていても置き換えは行わず、通常の
   `AddScoped` などと同様に登録を追加します。
 - `AutoRegisterServiceAttribute` は派生クラスへ継承されません。登録対象にする具象クラス
